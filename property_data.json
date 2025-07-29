@@ -1,0 +1,23 @@
+[
+  {
+    "id": "35a8adba-1970-44e0-8b83-5adc2beda2de",
+    "address": "oxford",
+    "property_type": "Single Family",
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "square_feet": 1500,
+    "year_built": 2000,
+    "price": 300000,
+    "down_payment": 60000,
+    "loan_amount": 240000,
+    "interest_rate": 6.5,
+    "loan_term": 30,
+    "monthly_rent": 2500,
+    "monthly_expenses": 500,
+    "neighborhood": "",
+    "school_district": "",
+    "date_acquired": "2025-07-29",
+    "notes": "",
+    "date_added": "2025-07-29 19:19:52.249857"
+  }
+]

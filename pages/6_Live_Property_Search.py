@@ -159,7 +159,7 @@ with tab2:
         
         with col2:
             avg_price = sum(p.get('price', 0) for p in results) / len(results) if results else 0
-            st.metric("Average Price", f"${avg_price:,.0f}")
+            st.metric("Average Price", f"£{avg_price:,.0f}")
         
         with col3:
             sources = set(p.get('source', 'Unknown') for p in results)
@@ -167,7 +167,7 @@ with tab2:
         
         with col4:
             avg_rent = sum(p.get('monthly_rent', 0) for p in results) / len(results) if results else 0
-            st.metric("Average Rent", f"${avg_rent:,.0f}")
+            st.metric("Average Rent", f"£{avg_rent:,.0f}")
         
         # Display properties
         st.markdown("---")
@@ -197,7 +197,7 @@ with tab2:
         
         # Property cards
         for i, prop in enumerate(results):
-            with st.expander(f"🏠 {prop.get('address', 'Unknown Address')} - ${prop.get('price', 0):,.0f}"):
+            with st.expander(f"🏠 {prop.get('address', 'Unknown Address')} - £{prop.get('price', 0):,.0f}"):
                 col1, col2, col3 = st.columns([1, 2, 1])
                 
                 with col1:
@@ -215,12 +215,13 @@ with tab2:
                     # Property details
                     st.markdown(f"**Address:** {prop.get('address', 'N/A')}")
                     st.markdown(f"**Type:** {prop.get('property_type', 'N/A')}")
-                    st.markdown(f"**Price:** ${prop.get('price', 0):,.0f}")
-                    st.markdown(f"**Estimated Rent:** ${prop.get('monthly_rent', 0):,.0f}/month")
+                    st.markdown(f"**Price:** £{prop.get('price', 0):,.0f}")
+                    st.markdown(f"**Monthly Rent:** £{prop.get('monthly_rent', 0):,.0f}/month")
                     st.markdown(f"**Bedrooms:** {prop.get('bedrooms', 'N/A')}")
                     st.markdown(f"**Bathrooms:** {prop.get('bathrooms', 'N/A')}")
                     st.markdown(f"**Square Feet:** {prop.get('square_feet', 'N/A'):,}")
-                    st.markdown(f"**Year Built:** {prop.get('year_built', 'N/A')}")
+                    st.markdown(f"**Postcode:** {prop.get('postcode', 'N/A')}")
+                    st.markdown(f"**Tenure:** {prop.get('tenure', 'N/A')}")
                     st.markdown(f"**Source:** {prop.get('source', 'N/A')}")
                 
                 with col3:
@@ -310,7 +311,7 @@ with tab2:
                             st.metric("Average Gross Yield", f"{avg_yield:.1f}%")
                         with col3:
                             avg_price = analysis_df['Price'].mean()
-                            st.metric("Average Price", f"${avg_price:,.0f}")
+                            st.metric("Average Price", f"£{avg_price:,.0f}")
                         
                         # Visualization
                         fig = px.scatter(

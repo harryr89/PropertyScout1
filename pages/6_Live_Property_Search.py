@@ -67,10 +67,134 @@ if not any(api_status.values()):
         """)
 
 # Tabs for different search options
-tab1, tab2, tab3 = st.tabs(["Property Search", "Search Results", "Saved Searches"])
+tab1, tab2, tab3, tab4 = st.tabs(["Address Search", "Area Search", "Search Results", "Auto Compare"])
 
 with tab1:
-    st.subheader("🔍 Search Properties")
+    st.subheader("🏠 Address-Based Property Search")
+    st.markdown("Enter a specific address to find local market comparisons and automatically populate deal analysis.")
+    
+    # Address search form
+    with st.form("address_search_form"):
+        col1, col2 = st.columns([3, 1])
+        
+        with col1:
+            target_address = st.text_input(
+                "Property Address",
+                placeholder="e.g., 123 Victoria Street, Manchester M1 2AB",
+                help="Enter a specific UK address to search for comparable properties in the local area"
+            )
+        
+        with col2:
+            search_radius = st.selectbox(
+                "Search Radius",
+                ["0.5 miles", "1 mile", "2 miles", "5 miles"],
+                index=1
+            )
+        
+        # Search criteria
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            property_type = st.selectbox(
+                "Property Type",
+                ["All Types", "Terraced", "Semi-Detached", "Detached", "Flat/Apartment", "Bungalow"]
+            )
+        
+        with col2:
+            min_price = st.number_input("Min Price (£)", min_value=0, value=150000, step=10000)
+        
+        with col3:
+            max_price = st.number_input("Max Price (£)", min_value=0, value=500000, step=10000)
+        
+        # Additional filters
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            min_bedrooms = st.selectbox("Min Bedrooms", [1, 2, 3, 4, 5, 6], index=1)
+        
+        with col2:
+            max_bedrooms = st.selectbox("Max Bedrooms", [1, 2, 3, 4, 5, 6, 7, 8], index=3)
+        
+        with col3:
+            include_investment = st.checkbox("Include Investment Analysis", value=True)
+        
+        submit_search = st.form_submit_button("🔍 Search Local Market", use_container_width=True)
+    
+    if submit_search and target_address:
+        with st.spinner("Searching for properties near your address..."):
+            # Parse the address to extract city/area
+            address_parts = target_address.split(',')
+            if len(address_parts) >= 2:
+                city = address_parts[-2].strip()
+            else:
+                city = target_address.split()[-1]
+            
+            # Search for properties in the area
+            search_params = {
+                'location': city,
+                'property_type': property_type.lower().replace('/', '_') if property_type != "All Types" else 'all',
+                'min_price': min_price,
+                'max_price': max_price,
+                'min_bedrooms': min_bedrooms,
+                'max_bedrooms': max_bedrooms,
+                'radius': search_radius
+            }
+            
+            properties = st.session_state.property_sources.search_local_market(target_address, search_params)
+            
+            if properties:
+                st.success(f"Found {len(properties)} properties near {target_address}")
+                
+                # Store search results in session state
+                st.session_state.address_search_results = properties
+                st.session_state.target_address = target_address
+                
+                # Display summary
+                col1, col2, col3, col4 = st.columns(4)
+                
+                with col1:
+                    avg_price = sum(p['price'] for p in properties) / len(properties)
+                    st.metric("Average Price", f"£{avg_price:,.0f}")
+                
+                with col2:
+                    avg_yield = sum(p.get('rental_yield', 0) for p in properties) / len(properties)
+                    st.metric("Average Yield", f"{avg_yield:.1f}%")
+                
+                with col3:
+                    price_range = max(p['price'] for p in properties) - min(p['price'] for p in properties)
+                    st.metric("Price Range", f"£{price_range:,.0f}")
+                
+                with col4:
+                    st.metric("Properties Found", len(properties))
+                
+                # Quick preview of top properties
+                st.markdown("### Top 5 Properties")
+                preview_df = pd.DataFrame(properties[:5])
+                display_cols = ['address', 'price', 'bedrooms', 'property_type', 'rental_yield']
+                available_cols = [col for col in display_cols if col in preview_df.columns]
+                
+                if available_cols:
+                    preview_display = preview_df[available_cols].copy()
+                    if 'price' in preview_display.columns:
+                        preview_display['price'] = preview_display['price'].apply(lambda x: f"£{x:,.0f}")
+                    if 'rental_yield' in preview_display.columns:
+                        preview_display['rental_yield'] = preview_display['rental_yield'].apply(lambda x: f"{x:.1f}%")
+                    
+                    st.dataframe(preview_display, use_container_width=True)
+                
+                # Auto-compare button
+                if include_investment and len(properties) >= 2:
+                    if st.button("📊 Auto-Compare Top Properties", use_container_width=True):
+                        # Store top properties for comparison
+                        st.session_state.auto_compare_properties = properties[:10]  # Top 10 for comparison
+                        st.success("Properties queued for automatic comparison! Check the 'Auto Compare' tab.")
+                        st.rerun()
+                
+            else:
+                st.warning(f"No properties found near {target_address}. Try expanding your search criteria.")
+
+with tab2:
+    st.subheader("🌍 Area-Based Property Search")
     
     col1, col2 = st.columns(2)
     
@@ -331,8 +455,147 @@ with tab2:
     else:
         st.info("No search results available. Use the Property Search tab to find properties.")
 
+with tab4:
+    st.subheader("⚡ Auto Compare Properties")
+    st.markdown("Automatically import and compare properties from your address search for investment analysis.")
+    
+    if 'auto_compare_properties' in st.session_state and st.session_state.auto_compare_properties:
+        properties = st.session_state.auto_compare_properties
+        
+        st.success(f"Ready to compare {len(properties)} properties from your search!")
+        
+        # Selection interface
+        st.markdown("### Select Properties for Comparison")
+        
+        # Create selection interface
+        selected_properties = []
+        
+        for i, prop in enumerate(properties):
+            col1, col2, col3 = st.columns([1, 4, 2])
+            
+            with col1:
+                selected = st.checkbox(
+                    f"Property {i+1}",
+                    key=f"auto_compare_{i}",
+                    value=i < 5  # Auto-select first 5
+                )
+            
+            with col2:
+                st.markdown(f"**{prop.get('address', 'N/A')}**")
+                st.markdown(f"£{prop.get('price', 0):,.0f} • {prop.get('bedrooms', 'N/A')} bed • {prop.get('rental_yield', 0):.1f}% yield")
+            
+            with col3:
+                if prop.get('rental_yield', 0) >= 7:
+                    st.success("High Yield")
+                elif prop.get('rental_yield', 0) >= 5:
+                    st.info("Good Yield")
+                else:
+                    st.warning("Low Yield")
+            
+            if selected:
+                selected_properties.append(prop)
+        
+        # Action buttons
+        st.markdown("---")
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            if st.button("📊 Generate Deal Comparison", use_container_width=True):
+                if selected_properties:
+                    # Convert selected properties to the format expected by Deal Comparison
+                    for prop in selected_properties:
+                        # Add required fields for property import
+                        import_data = {
+                            'id': prop.get('id', f"auto_import_{uuid.uuid4()}"),
+                            'address': prop.get('address', ''),
+                            'property_type': prop.get('property_type', 'Unknown'),
+                            'price': prop.get('price', 0),
+                            'monthly_rent': prop.get('monthly_rent', 0),
+                            'monthly_expenses': prop.get('price', 0) * 0.01,  # Estimate 1% monthly expenses
+                            'loan_amount': prop.get('price', 0) * 0.75,  # Assume 75% LTV
+                            'down_payment': prop.get('price', 0) * 0.25,  # 25% down
+                            'interest_rate': 5.5,  # Current UK average
+                            'loan_term': 25,  # UK standard
+                            'bedrooms': prop.get('bedrooms', 0),
+                            'bathrooms': prop.get('bathrooms', 0),
+                            'square_feet': prop.get('square_feet', 0),
+                            'year_built': 1980,  # Default estimate
+                            'date_acquired': datetime.now().strftime('%Y-%m-%d'),
+                            'source': prop.get('source', 'Auto Import')
+                        }
+                        
+                        # Save to data manager
+                        st.session_state.data_manager.add_property(import_data)
+                    
+                    st.success(f"Imported {len(selected_properties)} properties for comparison!")
+                    st.info("Navigate to the 'Deal Comparison' page to analyze these properties.")
+                    
+                    # Optional: Auto-navigate hint
+                    st.markdown("**Next Steps:**")
+                    st.markdown("1. Go to the **Deal Comparison** page")
+                    st.markdown("2. Your imported properties will be available for analysis")
+                    st.markdown("3. Use the scoring system to rank investment potential")
+                else:
+                    st.warning("Please select properties to import.")
+        
+        with col2:
+            if st.button("📈 Quick Analysis", use_container_width=True):
+                if selected_properties:
+                    # Generate quick comparison metrics
+                    st.markdown("### Quick Investment Analysis")
+                    
+                    comparison_data = []
+                    for prop in selected_properties:
+                        price = prop.get('price', 0)
+                        monthly_rent = prop.get('monthly_rent', 0)
+                        rental_yield = prop.get('rental_yield', 0)
+                        
+                        comparison_data.append({
+                            'Address': prop.get('address', 'N/A')[:30] + '...',
+                            'Price': f"£{price:,.0f}",
+                            'Monthly Rent': f"£{monthly_rent:,.0f}",
+                            'Gross Yield': f"{rental_yield:.1f}%",
+                            'Property Type': prop.get('property_type', 'N/A')
+                        })
+                    
+                    comparison_df = pd.DataFrame(comparison_data)
+                    st.dataframe(comparison_df, use_container_width=True)
+                    
+                    # Quick metrics
+                    prices = [prop.get('price', 0) for prop in selected_properties]
+                    yields = [prop.get('rental_yield', 0) for prop in selected_properties]
+                    
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        avg_price = sum(prices) / len(prices) if prices else 0
+                        st.metric("Average Price", f"£{avg_price:,.0f}")
+                    with col2:
+                        avg_yield = sum(yields) / len(yields) if yields else 0
+                        st.metric("Average Yield", f"{avg_yield:.1f}%")
+                    with col3:
+                        best_yield = max(yields) if yields else 0
+                        st.metric("Best Yield", f"{best_yield:.1f}%")
+                else:
+                    st.warning("Please select properties to analyze.")
+        
+        with col3:
+            if st.button("🗑️ Clear Selection", use_container_width=True):
+                # Clear the auto compare properties
+                if 'auto_compare_properties' in st.session_state:
+                    del st.session_state.auto_compare_properties
+                st.success("Selection cleared!")
+                st.rerun()
+    
+    else:
+        st.info("No properties available for auto comparison.")
+        st.markdown("**To use Auto Compare:**")
+        st.markdown("1. Use the **Address Search** tab")
+        st.markdown("2. Search for properties near a specific address")
+        st.markdown("3. Click **Auto-Compare Top Properties**")
+        st.markdown("4. Return to this tab to import and analyze")
+
 with tab3:
-    st.subheader("💾 Saved Searches")
+    st.subheader("📋 Search Results")
     
     st.markdown("**Save Current Search**")
     

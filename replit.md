@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a comprehensive property investment analytics platform built with Streamlit. The application provides real estate investors with tools to analyze, compare, and track property investments through multiple analytical perspectives including financial calculations, market analysis, and performance tracking.
+This is a comprehensive UK property investment analytics platform built with Streamlit. The application provides UK real estate investors with tools to analyze, compare, and track British property investments through multiple analytical perspectives including financial calculations, market analysis, and live property data sourcing from UK markets.
 
 ## System Architecture
 
@@ -56,6 +56,12 @@ This is a comprehensive property investment analytics platform built with Stream
    - Historical data analysis
    - Time-series performance metrics
 
+6. **Live Property Search** (`pages/6_Live_Property_Search.py`)
+   - UK property data sourcing from multiple platforms
+   - Real-time property search and filtering
+   - Market-based property import and analysis
+   - UK-specific yield calculations and metrics
+
 ### Utility Classes
 
 #### DataManager (`utils/data_manager.py`)
@@ -76,6 +82,13 @@ This is a comprehensive property investment analytics platform built with Stream
 - Market benchmark comparisons
 - Normalization and scoring functions
 
+#### PropertyDataSources (`utils/property_data_sources.py`)
+- UK property data integration from multiple sources
+- API connections to Rightmove, Zoopla, OnTheMarket, PropertyData, Land Registry
+- Real-time property search and data normalization
+- UK market-specific yield calculations and rental estimations
+- Fallback demo data generation based on current UK market research
+
 ## Data Flow
 
 1. **Input Flow**: User enters property data through forms → DataManager validates and stores → JSON persistence
@@ -91,12 +104,19 @@ This is a comprehensive property investment analytics platform built with Stream
 - **Plotly**: Interactive visualizations (express and graph_objects)
 - **NumPy**: Mathematical operations and calculations
 
+### Data Sourcing Dependencies
+- **Requests**: HTTP client for API interactions
+- **BeautifulSoup4**: HTML parsing for web scraping fallbacks
+- **Selenium**: Browser automation for complex property sites
+- **Trafilatura**: Web content extraction and text processing
+- **Python-dotenv**: Environment variable management
+
 ### Standard Library
 - **datetime**: Date and time handling
 - **json**: Data serialization
 - **os**: File system operations
 - **uuid**: Unique identifier generation
-- **random**: Sample data generation
+- **random**: Market-realistic sample data generation
 
 ## Deployment Strategy
 
@@ -113,9 +133,20 @@ This is a comprehensive property investment analytics platform built with Stream
 
 ## User Preferences
 
-Preferred communication style: Simple, everyday language.
+- **Market Focus**: UK-based property deal sourcing and analysis
+- **Communication Style**: Simple, everyday language
+- **Currency**: British Pounds (£) for all financial displays
+- **Property Types**: UK-specific property categories (Terraced, Semi-Detached, Detached, Flat/Apartment, Bungalow)
+- **Yield Focus**: UK rental yield standards (6%+ considered good, 4-6% average, <4% poor)
 
 ## Changelog
 
-Changelog:
-- July 05, 2025. Initial setup
+- **July 29, 2025**: Adapted system for UK property market focus
+  - Updated PropertyDataSources for UK property APIs (Rightmove, Zoopla, OnTheMarket, PropertyData, Land Registry)
+  - Implemented UK-specific property types and market data
+  - Added realistic UK market data generation based on 2025 research
+  - Updated UI for British currency (£) and UK property terminology
+  - Added UK-specific yield calculations and market benchmarks
+  - Integrated live property search with UK market focus
+
+- **July 05, 2025**: Initial setup

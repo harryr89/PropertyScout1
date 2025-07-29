@@ -38,7 +38,7 @@ else:
         if isinstance(start_date, str):
             start_date = datetime.strptime(start_date, '%Y-%m-%d')
         
-        months = pd.date_range(start=start_date, end=datetime.now(), freq='M')
+        months = pd.date_range(start=start_date, end=datetime.now(), freq='ME')
         
         performance_data = []
         base_value = property_data['price']

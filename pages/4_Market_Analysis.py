@@ -25,7 +25,7 @@ if 'data_manager' not in st.session_state:
 def generate_market_data():
     """Generate sample market data for demonstration"""
     # Historical price trends
-    dates = pd.date_range(start='2020-01-01', end='2024-12-31', freq='M')
+    dates = pd.date_range(start='2020-01-01', end='2024-12-31', freq='ME')
     base_price = 350000
     
     price_data = []
@@ -414,7 +414,7 @@ with tab4:
     # Generate forecast data
     forecast_periods = 12  # 12 months
     last_date = market_data['date'].max()
-    forecast_dates = pd.date_range(start=last_date + timedelta(days=30), periods=forecast_periods, freq='M')
+    forecast_dates = pd.date_range(start=last_date + timedelta(days=30), periods=forecast_periods, freq='ME')
     
     # Simple trend-based forecast
     recent_trend = np.polyfit(range(12), market_data['median_price'].tail(12), 1)[0]

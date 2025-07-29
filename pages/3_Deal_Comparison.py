@@ -259,7 +259,7 @@ else:
                 title="Top 5 Properties by Score",
                 labels={'x': 'Property', 'y': 'Score'}
             )
-            fig.update_xaxis(tickangle=45)
+            fig.update_layout(xaxis_tickangle=45)
             st.plotly_chart(fig, use_container_width=True)
         
         with col2:

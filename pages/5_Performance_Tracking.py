@@ -152,7 +152,7 @@ else:
                 y='price',
                 title="Individual Property Values"
             )
-            fig.update_xaxis(tickangle=45)
+            fig.update_layout(xaxis_tickangle=45)
             st.plotly_chart(fig, use_container_width=True)
         
         # Performance over time (aggregate)
@@ -399,7 +399,7 @@ else:
                     y='Total Return',
                     title="Total Return by Property"
                 )
-                fig.update_xaxis(tickangle=45)
+                fig.update_layout(xaxis_tickangle=45)
                 st.plotly_chart(fig, use_container_width=True)
             
             with col2:
@@ -563,7 +563,7 @@ else:
                         y='Total Return',
                         title="Annual Total Return by Property"
                     )
-                    fig.update_xaxis(tickangle=45)
+                    fig.update_layout(xaxis_tickangle=45)
                     st.plotly_chart(fig, use_container_width=True)
             
             elif report_type == "Property Comparison":

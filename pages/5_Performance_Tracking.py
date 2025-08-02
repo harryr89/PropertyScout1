@@ -142,7 +142,7 @@ else:
                     names=type_values.index,
                     title="Portfolio Value by Property Type"
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True, key="portfolio_type_pie")
         
         with col2:
             # By individual property
@@ -153,7 +153,7 @@ else:
                 title="Individual Property Values"
             )
             fig.update_layout(xaxis_tickangle=45)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, key="individual_property_bar")
         
         # Performance over time (aggregate)
         st.markdown("---")
@@ -194,7 +194,7 @@ else:
                     y='property_value',
                     title="Portfolio Value Over Time"
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True, key="portfolio_value_line")
             
             with col2:
                 # Cash flow over time
@@ -204,7 +204,7 @@ else:
                     y='monthly_cash_flow',
                     title="Monthly Cash Flow Over Time"
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True, key="portfolio_cashflow_line")
             
             # Total return chart
             fig = px.line(
@@ -213,7 +213,7 @@ else:
                 y='total_return',
                 title="Total Return Over Time (%)"
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, key="total_return_line")
     
     with tab2:
         st.subheader("🏡 Individual Property Performance")
@@ -288,7 +288,7 @@ else:
                         y='property_value',
                         title="Property Value Over Time"
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, use_container_width=True, key="property_value_chart")
                 
                 with col2:
                     # Monthly cash flow
@@ -298,7 +298,7 @@ else:
                         y='monthly_cash_flow',
                         title="Monthly Cash Flow Over Time"
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, use_container_width=True, key="monthly_cash_flow_chart")
                 
                 # Combined performance chart
                 fig = go.Figure()
@@ -328,7 +328,7 @@ else:
                     hovermode='x unified'
                 )
                 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True, key="appreciation_vs_return_chart")
     
     with tab3:
         st.subheader("📈 Performance Metrics Analysis")
@@ -497,7 +497,7 @@ else:
                         color='Property',
                         title="Monthly Cash Flow by Property"
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, use_container_width=True, key="monthly_cashflow_chart")
                     
                     # Monthly performance table
                     pivot_table = monthly_df.pivot(index='Month', columns='Property', values='Cash Flow')
@@ -564,7 +564,7 @@ else:
                         title="Annual Total Return by Property"
                     )
                     fig.update_layout(xaxis_tickangle=45)
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, use_container_width=True, key="annual_return_bar")
             
             elif report_type == "Property Comparison":
                 st.markdown("**Property Comparison Report**")
@@ -620,7 +620,7 @@ else:
                         title="Property Performance Comparison"
                     )
                     fig.update_traces(textposition="top center")
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, use_container_width=True, key="property_comparison_scatter")
         
         # Export functionality
         st.markdown("---")

@@ -26,13 +26,13 @@ def generate_market_data():
     """Generate sample market data for demonstration"""
     # Historical price trends
     dates = pd.date_range(start='2020-01-01', end='2024-12-31', freq='ME')
-    base_price = 350000
+    base_price = 280000  # Updated to reflect current UK average house price
     
     price_data = []
     for date in dates:
         # Add some trend and seasonality
         months_from_start = (date - dates[0]).days / 30.44
-        trend = 1 + (months_from_start * 0.005)  # 0.5% monthly growth
+        trend = (1 + 0.0021) ** months_from_start  # 2.5% annual growth compounded monthly
         seasonal = 1 + 0.05 * np.sin(2 * np.pi * date.month / 12)  # 5% seasonal variation
         noise = 1 + np.random.normal(0, 0.02)  # 2% random noise
         
@@ -93,7 +93,7 @@ with tab1:
         x='date',
         y='median_price',
         title=f"Median Home Price Trend ({time_period})",
-        labels={'date': 'Date', 'median_price': 'Median Price ($)'}
+        labels={'date': 'Date', 'median_price': 'Median Price (£)'}
     )
     
     # Add trend line
@@ -117,10 +117,10 @@ with tab1:
     price_change = ((current_price - previous_price) / previous_price) * 100
     
     with col1:
-        st.metric("Current Median Price", f"${current_price:,.0f}")
+        st.metric("Current Median Price", f"£{current_price:,.0f}")
     
     with col2:
-        st.metric("Price Change", f"{price_change:+.1f}%", delta=f"${current_price - previous_price:,.0f}")
+        st.metric("Price Change", f"{price_change:+.1f}%", delta=f"£{current_price - previous_price:,.0f}")
     
     with col3:
         annual_growth = (price_change / int(time_period.split()[0])) if time_period != "1 Year" else price_change

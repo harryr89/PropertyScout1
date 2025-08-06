@@ -34,37 +34,37 @@ with tab1:
     
     with col1:
         st.markdown("**Property Details**")
-        purchase_price = st.number_input("Purchase Price ($)", min_value=0.0, value=300000.0, step=1000.0)
+        purchase_price = st.number_input("Purchase Price (£)", min_value=0.0, value=280000.0, step=1000.0)
         down_payment_pct = st.slider("Down Payment (%)", min_value=0, max_value=100, value=20)
         down_payment = purchase_price * (down_payment_pct / 100)
-        st.write(f"Down Payment: ${down_payment:,.0f}")
+        st.write(f"Down Payment: £{down_payment:,.0f}")
         
         loan_amount = purchase_price - down_payment
-        st.write(f"Loan Amount: ${loan_amount:,.0f}")
+        st.write(f"Loan Amount: £{loan_amount:,.0f}")
         
         interest_rate = st.number_input("Interest Rate (%)", min_value=0.0, max_value=20.0, value=6.5, step=0.25)
         loan_term = st.number_input("Loan Term (years)", min_value=1, max_value=50, value=30)
         
     with col2:
         st.markdown("**Income & Expenses**")
-        monthly_rent = st.number_input("Monthly Rent ($)", min_value=0.0, value=2500.0, step=50.0)
+        monthly_rent = st.number_input("Monthly Rent (£)", min_value=0.0, value=1800.0, step=50.0)
         annual_rent = monthly_rent * 12
-        st.write(f"Annual Rent: ${annual_rent:,.0f}")
+        st.write(f"Annual Rent: £{annual_rent:,.0f}")
         
         # Operating expenses
-        property_taxes = st.number_input("Annual Property Taxes ($)", min_value=0.0, value=3600.0, step=100.0)
-        insurance = st.number_input("Annual Insurance ($)", min_value=0.0, value=1200.0, step=100.0)
-        maintenance = st.number_input("Annual Maintenance ($)", min_value=0.0, value=3000.0, step=100.0)
-        property_mgmt = st.number_input("Property Management ($)", min_value=0.0, value=2400.0, step=100.0)
+        property_taxes = st.number_input("Annual Council Tax (£)", min_value=0.0, value=2400.0, step=100.0)
+        insurance = st.number_input("Annual Insurance (£)", min_value=0.0, value=800.0, step=100.0)
+        maintenance = st.number_input("Annual Maintenance (£)", min_value=0.0, value=2000.0, step=100.0)
+        property_mgmt = st.number_input("Property Management (£)", min_value=0.0, value=1600.0, step=100.0)
         vacancy_rate = st.slider("Vacancy Rate (%)", min_value=0, max_value=30, value=5)
         
         total_expenses = property_taxes + insurance + maintenance + property_mgmt
         vacancy_loss = annual_rent * (vacancy_rate / 100)
         net_operating_income = annual_rent - vacancy_loss - total_expenses
         
-        st.write(f"Total Operating Expenses: ${total_expenses:,.0f}")
-        st.write(f"Vacancy Loss: ${vacancy_loss:,.0f}")
-        st.write(f"Net Operating Income: ${net_operating_income:,.0f}")
+        st.write(f"Total Operating Expenses: £{total_expenses:,.0f}")
+        st.write(f"Vacancy Loss: £{vacancy_loss:,.0f}")
+        st.write(f"Net Operating Income: £{net_operating_income:,.0f}")
     
     # Calculate key metrics
     if st.button("Calculate Metrics", type="primary"):

@@ -32,8 +32,8 @@ with tab1:
             st.markdown("**Basic Information**")
             address = st.text_input("Property Address*", placeholder="123 Main St, City, State")
             property_type = st.selectbox("Property Type*", 
-                                       ["Single Family", "Multi-Family", "Condo", "Townhouse", 
-                                        "Commercial", "Land", "Other"])
+                                       ["Terraced", "Semi-Detached", "Detached", "Flat/Apartment", 
+                                        "Bungalow", "Commercial", "Land", "Other"])
             bedrooms = st.number_input("Bedrooms", min_value=0, max_value=20, value=3)
             bathrooms = st.number_input("Bathrooms", min_value=0.0, max_value=20.0, value=2.0, step=0.5)
             square_feet = st.number_input("Square Feet", min_value=0, value=1500)
@@ -42,16 +42,16 @@ with tab1:
         with col2:
             # Financial information
             st.markdown("**Financial Details**")
-            price = st.number_input("Purchase Price ($)*", min_value=0.0, value=300000.0, step=1000.0)
-            down_payment = st.number_input("Down Payment ($)", min_value=0.0, value=60000.0, step=1000.0)
-            loan_amount = st.number_input("Loan Amount ($)", min_value=0.0, value=240000.0, step=1000.0)
+            price = st.number_input("Purchase Price (£)*", min_value=0.0, value=280000.0, step=1000.0)
+            down_payment = st.number_input("Down Payment (£)", min_value=0.0, value=56000.0, step=1000.0)
+            loan_amount = st.number_input("Loan Amount (£)", min_value=0.0, value=224000.0, step=1000.0)
             interest_rate = st.number_input("Interest Rate (%)", min_value=0.0, max_value=20.0, value=6.5, step=0.25)
             loan_term = st.number_input("Loan Term (years)", min_value=1, max_value=50, value=30)
             
             # Income and expenses
             st.markdown("**Income & Expenses**")
-            monthly_rent = st.number_input("Monthly Rent ($)", min_value=0.0, value=2500.0, step=50.0)
-            monthly_expenses = st.number_input("Monthly Expenses ($)", min_value=0.0, value=500.0, step=50.0)
+            monthly_rent = st.number_input("Monthly Rent (£)", min_value=0.0, value=1800.0, step=50.0)
+            monthly_expenses = st.number_input("Monthly Expenses (£)", min_value=0.0, value=400.0, step=50.0)
             
         # Additional details
         st.markdown("**Additional Information**")

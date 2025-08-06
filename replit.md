@@ -141,6 +141,16 @@ This is a comprehensive UK property investment analytics platform built with Str
 
 ## Changelog
 
+- **August 06, 2025**: Major system improvements based on code analysis
+  - **Fixed critical calculation bug**: Replaced linear growth with proper cumulative compounding in performance tracking
+  - **Updated UK market rates**: Property appreciation reduced to 2.5% annually (from 4%) based on 2025 market data
+  - **Currency standardization**: All financial displays now use £ consistently across all pages
+  - **UK property types**: Standardized to Terraced, Semi-Detached, Detached, Flat/Apartment, Bungalow
+  - **Enhanced calculations**: Added LTV (Loan-to-Value) ratio to financial metrics
+  - **Realistic UK defaults**: Updated base house price to £280,000, rent to £1,800/month
+  - **Fixed Streamlit errors**: Added unique keys to all plotly charts to prevent duplicate element errors
+  - **Market data accuracy**: Implemented proper compound growth in market analysis
+
 - **July 29, 2025**: Adapted system for UK property market focus
   - Updated PropertyDataSources for UK property APIs (Rightmove, Zoopla, OnTheMarket, PropertyData, Land Registry)
   - Implemented UK-specific property types and market data

@@ -49,6 +49,12 @@ class PropertyCalculator:
             return 0
         return property_value / annual_rent
     
+    def calculate_ltv(self, loan_amount, property_value):
+        """Calculate Loan-to-Value ratio"""
+        if property_value == 0:
+            return 0
+        return (loan_amount / property_value) * 100
+    
     def calculate_one_percent_rule(self, property_value, monthly_rent):
         """Check if property passes 1% rule"""
         return monthly_rent >= (property_value * 0.01)
@@ -87,6 +93,7 @@ class PropertyCalculator:
         roi = self.calculate_roi(annual_cash_flow, down_payment)
         dscr = self.calculate_dscr(net_operating_income, annual_debt_service)
         grm = self.calculate_grm(purchase_price, annual_rent)
+        ltv = self.calculate_ltv(loan_amount, purchase_price)
         one_percent_rule = self.calculate_one_percent_rule(purchase_price, annual_rent / 12)
         
         return {
@@ -107,6 +114,7 @@ class PropertyCalculator:
             'roi': roi,
             'dscr': dscr,
             'grm': grm,
+            'ltv': ltv,
             'one_percent_rule': one_percent_rule
         }
     

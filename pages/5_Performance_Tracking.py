@@ -33,7 +33,7 @@ if properties_df.empty:
 else:
     # Generate performance data for demonstration
     def generate_performance_data(property_data):
-        """Generate historical performance data for a property"""
+        """Generate historical performance data for a property with cumulative compounding"""
         start_date = property_data.get('date_acquired', datetime.now() - timedelta(days=365))
         if isinstance(start_date, str):
             start_date = datetime.strptime(start_date, '%Y-%m-%d')
@@ -43,39 +43,57 @@ else:
         performance_data = []
         base_value = property_data['price']
         base_rent = property_data['monthly_rent']
+        base_expenses = property_data['monthly_expenses']
+        
+        # Initialize cumulative values
+        current_value = base_value
+        current_rent = base_rent
+        current_expenses = base_expenses
+        total_cash_flow = 0  # Accumulate for accurate total return
+        
+        # Updated UK market rates based on 2025 data
+        annual_appreciation_rate = 0.025  # 2.5% annual (down from 4%)
+        annual_rent_growth = 0.03  # 3% annual
+        annual_expense_growth = 0.02  # 2% annual
         
         for i, month in enumerate(months):
-            # Property appreciation (3-5% annually with some volatility)
-            appreciation_rate = 0.04 + np.random.normal(0, 0.02)
-            current_value = base_value * (1 + appreciation_rate * (i / 12))
+            # Monthly appreciation with realistic UK volatility
+            monthly_app_rate = (annual_appreciation_rate / 12) + np.random.normal(0, 0.02 / np.sqrt(12))
+            current_value *= (1 + monthly_app_rate)
             
-            # Rent growth (2-4% annually)
-            rent_growth = 0.03 + np.random.normal(0, 0.01)
-            current_rent = base_rent * (1 + rent_growth * (i / 12))
+            # Monthly rent growth with volatility
+            monthly_rent_growth = (annual_rent_growth / 12) + np.random.normal(0, 0.01 / np.sqrt(12))
+            current_rent *= (1 + monthly_rent_growth)
             
-            # Monthly expenses (varies with some seasonality)
-            monthly_expenses = property_data['monthly_expenses'] * (1 + 0.02 * (i / 12))
+            # Monthly expense growth with smaller volatility
+            monthly_exp_growth = (annual_expense_growth / 12) + np.random.normal(0, 0.005 / np.sqrt(12))
+            current_expenses *= (1 + monthly_exp_growth)
             
-            # Calculate metrics
-            monthly_cash_flow = current_rent - monthly_expenses
-            annual_cash_flow = monthly_cash_flow * 12
+            # Calculate monthly cash flow
+            monthly_cash_flow = current_rent - current_expenses
             
-            # Simple mortgage calculation
-            if property_data['loan_amount'] > 0:
-                r = property_data['interest_rate'] / 100 / 12
-                n = property_data['loan_term'] * 12
-                monthly_payment = property_data['loan_amount'] * (r * (1 + r)**n) / ((1 + r)**n - 1)
+            # Mortgage payment calculation (fixed monthly payment)
+            if property_data.get('loan_amount', 0) > 0:
+                r = property_data.get('interest_rate', 0) / 100 / 12
+                n = property_data.get('loan_term', 30) * 12
+                if r > 0:
+                    monthly_payment = property_data['loan_amount'] * (r * (1 + r)**n) / ((1 + r)**n - 1)
+                else:
+                    monthly_payment = property_data['loan_amount'] / n
                 monthly_cash_flow -= monthly_payment
-                annual_cash_flow = monthly_cash_flow * 12
             
-            total_return = ((current_value - base_value) + (annual_cash_flow * (i / 12))) / base_value * 100
+            # Accumulate total cash flow for accurate total return calculation
+            total_cash_flow += monthly_cash_flow
+            
+            # Calculate total return based on appreciation + accumulated cash flow
+            total_return = ((current_value - base_value) + total_cash_flow) / base_value * 100
             
             performance_data.append({
                 'date': month,
                 'property_value': current_value,
                 'monthly_rent': current_rent,
                 'monthly_cash_flow': monthly_cash_flow,
-                'annual_cash_flow': annual_cash_flow,
+                'annual_cash_flow': monthly_cash_flow * 12,  # Current annualized
                 'total_return': total_return,
                 'appreciation': ((current_value - base_value) / base_value) * 100
             })
@@ -112,20 +130,20 @@ else:
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            st.metric("Total Portfolio Value", f"${total_value:,.0f}")
-            st.metric("Total Monthly Rent", f"${total_monthly_rent:,.0f}")
+            st.metric("Total Portfolio Value", f"£{total_value:,.0f}")
+            st.metric("Total Monthly Rent", f"£{total_monthly_rent:,.0f}")
         
         with col2:
-            st.metric("Monthly Cash Flow", f"${net_monthly_cash_flow:,.0f}")
-            st.metric("Annual Cash Flow", f"${net_monthly_cash_flow * 12:,.0f}")
+            st.metric("Monthly Cash Flow", f"£{net_monthly_cash_flow:,.0f}")
+            st.metric("Annual Cash Flow", f"£{net_monthly_cash_flow * 12:,.0f}")
         
         with col3:
             st.metric("Average ROI", f"{avg_roi:.1f}%")
             st.metric("Average Cap Rate", f"{avg_cap_rate:.1f}%")
         
         with col4:
-            st.metric("Total Equity", f"${total_equity:,.0f}")
-            st.metric("Total Debt", f"${total_debt:,.0f}")
+            st.metric("Total Equity", f"£{total_equity:,.0f}")
+            st.metric("Total Debt", f"£{total_debt:,.0f}")
         
         # Portfolio composition
         st.markdown("---")
@@ -511,16 +529,16 @@ else:
                 
                 with col1:
                     st.metric("Total Properties", len(properties_df))
-                    st.metric("Total Portfolio Value", f"${properties_df['price'].sum():,.0f}")
+                    st.metric("Total Portfolio Value", f"£{properties_df['price'].sum():,.0f}")
                 
                 with col2:
-                    st.metric("Total Monthly Rent", f"${properties_df['monthly_rent'].sum():,.0f}")
-                    st.metric("Total Monthly Expenses", f"${properties_df['monthly_expenses'].sum():,.0f}")
+                    st.metric("Total Monthly Rent", f"£{properties_df['monthly_rent'].sum():,.0f}")
+                    st.metric("Total Monthly Expenses", f"£{properties_df['monthly_expenses'].sum():,.0f}")
                 
                 with col3:
                     net_cash_flow = properties_df['monthly_rent'].sum() - properties_df['monthly_expenses'].sum()
-                    st.metric("Net Monthly Cash Flow", f"${net_cash_flow:,.0f}")
-                    st.metric("Quarterly Cash Flow", f"${net_cash_flow * 3:,.0f}")
+                    st.metric("Net Monthly Cash Flow", f"£{net_cash_flow:,.0f}")
+                    st.metric("Quarterly Cash Flow", f"£{net_cash_flow * 3:,.0f}")
             
             elif report_type == "Annual Review":
                 st.markdown("**Annual Performance Review**")

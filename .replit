@@ -2,7 +2,7 @@ modules = ["python-3.11"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["geckodriver", "glibcLocales"]
+packages = ["geckodriver", "glibcLocales", "nano"]
 
 [deployment]
 deploymentTarget = "autoscale"
@@ -35,3 +35,6 @@ externalPort = 80
 
 [agent]
 integrations = ["web_scraper==1.0.0"]
+
+[env]
+LC_ALL = "C"

@@ -66,14 +66,236 @@ if not any(api_status.values()):
         - `LAND_REGISTRY_API_KEY`
         """)
 
-# Tabs for different search options
-tab1, tab2, tab3, tab4 = st.tabs(["Address Search", "Area Search", "Search Results", "Auto Compare"])
+# Enhanced tabs with deal discovery
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["🎯 Deal Discovery", "Address Search", "Area Search", "Search Results", "Auto Compare"])
 
 with tab1:
+    st.subheader("🎯 Investment Deal Discovery Engine")
+    st.markdown("""Find the perfect investment deals using advanced criteria filtering and AI-powered property scoring.
+    Set your investment criteria and let the system discover deals that match your requirements.""")
+    
+    # Deal discovery interface
+    st.markdown("### 🎯 Investment Deal Discovery Criteria")
+    st.markdown("Configure your investment criteria to find the perfect deals:")
+    
+    with st.form("deal_discovery_form"):
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("**📍 Location & Property**")
+            location = st.text_input(
+                "Location",
+                value="Manchester",
+                help="UK city or area to search"
+            )
+            
+            property_types = st.multiselect(
+                "Property Types",
+                options=["Terraced", "Semi-Detached", "Detached", "Flat/Apartment", "Bungalow"],
+                default=["Terraced", "Semi-Detached", "Flat/Apartment"],
+                help="Select property types you're interested in"
+            )
+            
+            min_bedrooms = st.selectbox("Min Bedrooms", [1, 2, 3, 4, 5], index=1)
+            max_bedrooms = st.selectbox("Max Bedrooms", [2, 3, 4, 5, 6, 7, 8], index=3)
+        
+        with col2:
+            st.markdown("**💰 Financial Criteria**")
+            min_price = st.number_input("Min Price (£)", min_value=50000, value=150000, step=10000)
+            max_price = st.number_input("Max Price (£)", min_value=100000, value=400000, step=10000)
+            
+            min_yield = st.slider(
+                "Minimum Rental Yield (%)",
+                min_value=2.0, max_value=15.0, value=6.0, step=0.5,
+                help="UK average is 4-6%. Above 6% is good, 8%+ is excellent"
+            )
+            
+            min_cash_flow = st.number_input(
+                "Minimum Monthly Cash Flow (£)",
+                min_value=-500, value=200, step=50,
+                help="Positive cash flow after expenses and mortgage"
+            )
+        
+        st.markdown("**⚙️ Advanced Options**")
+        col3, col4 = st.columns(2)
+        
+        with col3:
+            max_results = st.slider("Max Results", 10, 100, 50, 5)
+            include_analysis = st.checkbox("Include Detailed Analysis", value=True)
+        
+        with col4:
+            sort_by = st.selectbox(
+                "Sort Results By",
+                ["Deal Score", "Rental Yield", "Price (Low to High)", "Cash Flow"]
+            )
+            auto_compare = st.checkbox("Auto-select for Comparison", value=True)
+        
+        submitted = st.form_submit_button(
+            "🚀 Discover Investment Deals",
+            use_container_width=True
+        )
+        
+        if submitted:
+            criteria = {
+                'location': location,
+                'property_types': property_types,
+                'min_bedrooms': min_bedrooms,
+                'max_bedrooms': max_bedrooms,
+                'min_price': min_price,
+                'max_price': max_price,
+                'min_yield': min_yield,
+                'min_cash_flow': min_cash_flow,
+                'max_results': max_results,
+                'sort_by': sort_by,
+                'include_analysis': include_analysis,
+                'auto_compare': auto_compare
+            }
+            
+            with st.spinner("🔍 Discovering investment deals..."):
+                deals = st.session_state.property_sources.discover_investment_deals(criteria)
+                
+                if deals:
+                    st.session_state.discovered_deals = deals
+                    st.session_state.deal_criteria = criteria
+                    
+                    # Display results
+                    st.success(f"🎉 Found {len(deals)} investment deals matching your criteria!")
+                    
+                    # Summary metrics
+                    col1, col2, col3, col4, col5 = st.columns(5)
+                    
+                    with col1:
+                        avg_deal_score = sum(d.get('deal_score', 0) for d in deals) / len(deals)
+                        st.metric("Avg Deal Score", f"{avg_deal_score:.1f}/100")
+                    
+                    with col2:
+                        avg_yield = sum(d.get('rental_yield', 0) for d in deals) / len(deals)
+                        st.metric("Avg Yield", f"{avg_yield:.1f}%")
+                    
+                    with col3:
+                        avg_price = sum(d.get('price', 0) for d in deals) / len(deals)
+                        st.metric("Avg Price", f"£{avg_price:,.0f}")
+                    
+                    with col4:
+                        avg_cash_flow = sum(d.get('estimated_cash_flow', 0) for d in deals) / len(deals)
+                        st.metric("Avg Cash Flow", f"£{avg_cash_flow:,.0f}")
+                    
+                    with col5:
+                        excellent_deals = len([d for d in deals if d.get('deal_score', 0) >= 80])
+                        st.metric("Excellent Deals", excellent_deals)
+                    
+                    # Top 5 deals preview
+                    st.markdown("### 🏆 Top Investment Deals")
+                    
+                    for i, deal in enumerate(deals[:5]):
+                        with st.expander(
+                            f"{deal.get('deal_quality', 'Unknown')} - "
+                            f"{deal.get('address', 'N/A')} - "
+                            f"£{deal.get('price', 0):,.0f} "
+                            f"({deal.get('rental_yield', 0):.1f}% yield)",
+                            expanded=i < 2
+                        ):
+                            col1, col2, col3 = st.columns([2, 2, 1])
+                            
+                            with col1:
+                                st.markdown(f"**📍 Address:** {deal.get('address', 'N/A')}")
+                                st.markdown(f"**🏠 Type:** {deal.get('property_type', 'N/A')}")
+                                st.markdown(f"**💰 Price:** £{deal.get('price', 0):,.0f}")
+                                st.markdown(f"**📊 Deal Score:** {deal.get('deal_score', 0):.1f}/100")
+                            
+                            with col2:
+                                st.markdown(f"**🛏️ Bedrooms:** {deal.get('bedrooms', 'N/A')}")
+                                st.markdown(f"**📈 Yield:** {deal.get('rental_yield', 0):.1f}%")
+                                st.markdown(f"**£ Monthly Rent:** £{deal.get('monthly_rent', 0):,}")
+                                cash_flow = deal.get('estimated_cash_flow', 0)
+                                st.markdown(f"**💵 Cash Flow:** £{cash_flow:,}/month")
+                            
+                            with col3:
+                                st.metric("Quality", deal.get('deal_quality', 'Unknown'))
+                                
+                                # Action button
+                                if st.button(f"➕ Add to Portfolio", key=f"add_deal_{deal.get('id', '')}_{i}"):
+                                    if 'data_manager' in st.session_state:
+                                        property_data = {
+                                            'id': deal.get('id', f"deal_{uuid.uuid4().hex[:8]}"),
+                                            'address': deal.get('address', ''),
+                                            'property_type': deal.get('property_type', 'Unknown'),
+                                            'price': deal.get('price', 0),
+                                            'monthly_rent': deal.get('monthly_rent', 0),
+                                            'monthly_expenses': deal.get('estimated_monthly_expenses', deal.get('price', 0) * 0.01),
+                                            'loan_amount': deal.get('price', 0) * 0.75,
+                                            'down_payment': deal.get('price', 0) * 0.25,
+                                            'interest_rate': 5.5,
+                                            'loan_term': 25,
+                                            'bedrooms': deal.get('bedrooms', 0),
+                                            'bathrooms': deal.get('bathrooms', 0),
+                                            'square_feet': deal.get('square_feet', 0),
+                                            'year_built': deal.get('year_built', 1990),
+                                            'date_acquired': datetime.now().strftime('%Y-%m-%d'),
+                                            'source': f"Deal Discovery - {deal.get('source', 'Unknown')}",
+                                            'notes': f"Deal Score: {deal.get('deal_score', 0):.1f}/100. Quality: {deal.get('deal_quality', 'Unknown')}."
+                                        }
+                                        
+                                        st.session_state.data_manager.save_property(property_data)
+                                        st.success("✅ Added to portfolio!")
+                    
+                    # Auto-populate comparison if enabled
+                    if criteria.get('auto_compare', False) and len(deals) >= 2:
+                        st.session_state.auto_compare_properties = deals[:10]
+                        st.success("🔥 Top deals auto-selected for comparison! Check the 'Auto Compare' tab.")
+                    
+                    # Show all deals button
+                    if st.button("📄 View All Deals", use_container_width=True):
+                        st.session_state['show_all_deals'] = True
+                        st.rerun()
+                else:
+                    st.warning("No deals found matching your criteria. Try adjusting your filters.")
+                    
+    # Display all deals if requested
+    if st.session_state.get('show_all_deals', False) and 'discovered_deals' in st.session_state:
+        st.markdown("### 📈 Complete Deal Analysis")
+        deals = st.session_state.discovered_deals
+        
+        # Deal quality pie chart
+        quality_counts = {}
+        for deal in deals:
+            quality = deal.get('deal_quality', 'Unknown')
+            quality_counts[quality] = quality_counts.get(quality, 0) + 1
+        
+        if quality_counts:
+            quality_df = pd.DataFrame([
+                {'Quality': k, 'Count': v} for k, v in quality_counts.items()
+            ])
+            
+            fig = px.pie(
+                quality_df,
+                values='Count',
+                names='Quality',
+                title="Deal Quality Distribution"
+            )
+            st.plotly_chart(fig, use_container_width=True, key="deal_quality_pie")
+        
+        # All deals table
+        deal_df = pd.DataFrame([{
+            'Address': d.get('address', 'N/A'),
+            'Price': f"£{d.get('price', 0):,.0f}",
+            'Yield': f"{d.get('rental_yield', 0):.1f}%",
+            'Cash Flow': f"£{d.get('estimated_cash_flow', 0):,}",
+            'Deal Score': f"{d.get('deal_score', 0):.1f}/100",
+            'Quality': d.get('deal_quality', 'Unknown')
+        } for d in deals])
+        
+        st.dataframe(deal_df, use_container_width=True)
+        
+        if st.button("❌ Hide All Deals"):
+            st.session_state['show_all_deals'] = False
+            st.rerun()
+
+with tab2:
     st.subheader("🏠 Address-Based Property Search")
     st.markdown("Enter a specific address to find local market comparisons and automatically populate deal analysis.")
     
-    # Address search form
+    # Address search form (existing functionality)
     with st.form("address_search_form"):
         col1, col2 = st.columns([3, 1])
         
@@ -186,14 +408,14 @@ with tab1:
                 if include_investment and len(properties) >= 2:
                     if st.button("📊 Auto-Compare Top Properties", use_container_width=True):
                         # Store top properties for comparison
-                        st.session_state.auto_compare_properties = properties[:10]  # Top 10 for comparison
+                        st.session_state.auto_compare_properties = properties[:10]
                         st.success("Properties queued for automatic comparison! Check the 'Auto Compare' tab.")
                         st.rerun()
                 
             else:
                 st.warning(f"No properties found near {target_address}. Try expanding your search criteria.")
 
-with tab2:
+with tab3:
     st.subheader("🌍 Area-Based Property Search")
     
     col1, col2 = st.columns(2)
@@ -269,7 +491,7 @@ with tab2:
         else:
             st.error("Please enter a search location.")
 
-with tab2:
+with tab4:
     st.subheader("📋 Search Results")
     
     if 'search_results' in st.session_state and st.session_state.search_results:
@@ -455,7 +677,7 @@ with tab2:
     else:
         st.info("No search results available. Use the Property Search tab to find properties.")
 
-with tab4:
+with tab5:
     st.subheader("⚡ Auto Compare Properties")
     st.markdown("Automatically import and compare properties from your address search for investment analysis.")
     
